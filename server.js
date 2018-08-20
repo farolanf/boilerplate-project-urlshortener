@@ -6,6 +6,8 @@ var mongoose = require('mongoose');
 
 var cors = require('cors');
 var bodyParser = require('body-parser')
+var urlRegex = require('url-regex')
+var dns = require('dns')
 
 var Shorturl = require('./Shorturl')
 
@@ -37,8 +39,26 @@ app.get("/api/hello", function (req, res) {
 
 app.post('/api/shorturl/new', (req, res) => {
   const url = req.body.url
-  if (!.test(url))
-  const shorturl = new Shorturl({ url })
+  
+  if (!urlRegex({ exact: true}).test(url)) {
+    res.json({ error: 'invalid URL' })
+    return
+  }
+  
+  dns.lookup(url, err => {
+    if (err) {
+      res.json({ error: 'invalid URL' })
+      return
+    }
+    const shorturl = new Shorturl({ url })
+    shorturl.save((err, data) => {
+      if (err) {
+        res.sendStatus(500)
+        return
+      }
+      res.json({ original_url: url, short_url: data._id })
+    })
+  })
 })
 
 app.listen(port, function () {
