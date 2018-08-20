@@ -57,7 +57,7 @@ app.post('/api/shorturl/new', (req, res) => {
         res.sendStatus(500)
         return
       }
-      res.json({ original_url: url, short_url: data._id })
+      res.json({ original_url: url, short_url: data.shortUrl })
     })
   })
 })
