@@ -51,13 +51,23 @@ app.post('/api/shorturl/new', (req, res) => {
       res.json({ error: 'unreachable URL' })
       return
     }
-    const shorturl = new Shorturl({ url })
-    shorturl.save((err, data) => {
-      if (err) {
+    Shorturl.findOne({ url }, (err, old) => {
+      if (old) {
         res.sendStatus(500)
         return
       }
-      res.json({ original_url: url, short_url: data.shortUrl })
+      if (old) {
+        res.json({ original_url: old.url, short_url: old.shortUrl })
+        return
+      }
+      const shorturl = new Shorturl({ url })
+      shorturl.save((err, data) => {
+        if (err) {
+          res.sendStatus(500)
+          return
+        }
+        res.json({ original_url: url, short_url: data.shortUrl })
+      })
     })
   })
 })
