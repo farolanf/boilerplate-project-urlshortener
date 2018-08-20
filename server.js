@@ -52,14 +52,16 @@ app.post('/api/shorturl/new', (req, res) => {
       return
     }
     Shorturl.findOne({ url }, (err, old) => {
-      if (old) {
+      if (err) {
         res.sendStatus(500)
         return
       }
+      // use existing
       if (old) {
         res.json({ original_url: old.url, short_url: old.shortUrl })
         return
       }
+      // create new
       const shorturl = new Shorturl({ url })
       shorturl.save((err, data) => {
         if (err) {
@@ -69,6 +71,14 @@ app.post('/api/shorturl/new', (req, res) => {
         res.json({ original_url: url, short_url: data.shortUrl })
       })
     })
+  })
+})
+
+app.get('/api/shorturl/:id', (req, res) => {
+  Shorturl.findOne({ shortUrl: req.params.id }, (err, data) => {
+    if (err) return res.sendStatus(500)
+    if (!data) return res.json({ error: 'invalid short url' })
+    res.redirect(data.url)
   })
 })
 
