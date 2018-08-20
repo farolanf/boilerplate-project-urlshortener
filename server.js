@@ -8,6 +8,7 @@ var cors = require('cors');
 var bodyParser = require('body-parser')
 var urlRegex = require('url-regex')
 var dns = require('dns')
+var { URL } = require('url')
 
 var Shorturl = require('./Shorturl')
 
@@ -45,9 +46,9 @@ app.post('/api/shorturl/new', (req, res) => {
     return
   }
   
-  dns.lookup(url, err => {
+  dns.lookup(new URL(url).host, err => {
     if (err) {
-      res.json({ error: 'invalid URL' })
+      res.json({ error: 'unreachable URL' })
       return
     }
     const shorturl = new Shorturl({ url })
